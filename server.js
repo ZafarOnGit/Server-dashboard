@@ -237,8 +237,37 @@ app.post('/bo2mp/restart', actionLimiter, (req, res) => {
   }
 });
 
+// ----- Startup validation: warn about missing scripts / cfg files -----
+(function validateServerDir() {
+  const required = [
+    { file: 'start.sh',        label: 'Minecraft start script' },
+    { file: 'start_mp.sh',     label: 'BO2 Multiplayer start script' },
+    { file: 'start_zombies.sh', label: 'BO2 Zombies start script' },
+    { file: 'dedicated.cfg',    label: 'BO2 Multiplayer config' },
+    { file: 'dedicated_zm.cfg', label: 'BO2 Zombies config' },
+  ];
+  let allFound = true;
+  for (const { file, label } of required) {
+    const full = path.join(SERVER_DIR, file);
+    if (!fs.existsSync(full)) {
+      console.warn(`WARNING: ${label} not found at ${full}`);
+      allFound = false;
+    }
+  }
+  if (!allFound) {
+    console.warn(
+      `\nSet the SERVER_DIR environment variable to the directory that contains your` +
+      ` start scripts and cfg files.\n` +
+      `  Current SERVER_DIR: ${SERVER_DIR}\n` +
+      `  Run this on your server to find the right directory:\n` +
+      `    find / -name "start_mp.sh" 2>/dev/null\n`
+    );
+  }
+})();
+
 // ----- Start server -----
 app.listen(PORT, () => {
   console.log(`Server dashboard running on http://localhost:${PORT}`);
   console.log(`Login: ${AUTH_USER} / ${AUTH_PASS}`);
+  console.log(`Game server directory: ${SERVER_DIR}`);
 });
