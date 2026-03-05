@@ -50,9 +50,16 @@ const SESSIONS = {
   bo2mp: 'bo2_mp',
 };
 
+// ----- Server directory (where the game scripts and cfg files live) -----
+// Set SERVER_DIR to the absolute path of your game-server directory.
+// Defaults to the dashboard's own directory when not set (useful for local dev).
+const SERVER_DIR = process.env.SERVER_DIR
+  ? path.resolve(process.env.SERVER_DIR)
+  : __dirname;
+
 // ----- Config file paths -----
-const CFG_MP = path.join(__dirname, 'dedicated.cfg');
-const CFG_ZM = path.join(__dirname, 'dedicated_zm.cfg');
+const CFG_MP = path.join(SERVER_DIR, 'dedicated.cfg');
+const CFG_ZM = path.join(SERVER_DIR, 'dedicated_zm.cfg');
 
 // ----- Helper: check if a screen session is running -----
 function isSessionRunning(sessionName) {
@@ -94,8 +101,8 @@ function stopSession(sessionName) {
 
 // ----- Helper: start a screen session with a script -----
 function startSession(sessionName, script) {
-  const scriptPath = path.join(__dirname, script);
-  execSync(`screen -dmS ${sessionName} bash "${scriptPath}"`);
+  // Run the script from SERVER_DIR so relative paths inside the script work correctly.
+  execSync(`screen -dmS ${sessionName} bash -c 'cd "${SERVER_DIR}" && bash "./${script}"'`);
 }
 
 // =============================================================
