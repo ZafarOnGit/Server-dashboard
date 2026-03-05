@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Server Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00d4ff;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #16213e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #555;
+      transition: background 0.4s;
+      flex-shrink: 0;
+    }
+
+    .status-dot.online  { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .status-dot.offline { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+    .status-label {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      background: #0f3460;
+      color: #e0e0e0;
+      border: 1px solid #334;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    select:focus { outline: 2px solid #00d4ff; }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.55rem 0.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-start   { background: #22c55e; color: #000; }
+    .btn-stop    { background: #ef4444; color: #fff; }
+    .btn-restart { background: #f59e0b; color: #000; }
+
+    .msg {
+      font-size: 0.82rem;
+      min-height: 1.2em;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    .msg.ok  { color: #22c55e; }
+    .msg.err { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <h1>⚙ Server Dashboard</h1>
+
+  <div class="dashboard">
+
+    <!-- ======== Minecraft ======== -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⛏ Minecraft</span>
+        <div>
+          <div class="status-dot" id="dot-minecraft"></div>
+          <div class="status-label" id="lbl-minecraft">Unknown</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-start"   onclick="action('minecraft','start')">Start</button>
+        <button class="btn-stop"    onclick="action('minecraft','stop')">Stop</button>
+        <button class="btn-restart" onclick="action('minecraft','restart')">Restart</button>
+      </div>
+      <div class="msg" id="msg-minecraft"></div>
+    </div>
+
+    <!-- ======== BO2 Zombies ======== -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🧟 BO2 Zombies</span>
+        <div>
+          <div class="status-dot" id="dot-bo2zm"></div>
+          <div class="status-label" id="lbl-bo2zm">Unknown</div>
+        </div>
+      </div>
+      <label for="map-bo2zm" style="font-size:0.85rem;color:#aaa;">Map</label>
+      <select id="map-bo2zm">
+        <option value="zm_transit">Transit</option>
+        <option value="zm_highrise">Die Rise</option>
+        <option value="zm_prison">Mob of the Dead</option>
+        <option value="zm_buried">Buried</option>
+        <option value="zm_nuked">Nuketown Zombies</option>
+        <option value="zm_tomb">Origins</option>
+      </select>
+      <div class="btn-row">
+        <button class="btn-start"   onclick="action('bo2zm','start')">Start</button>
+        <button class="btn-stop"    onclick="action('bo2zm','stop')">Stop</button>
+        <button class="btn-restart" onclick="action('bo2zm','restart')">Restart</button>
+      </div>
+      <div class="msg" id="msg-bo2zm"></div>
+    </div>
+
+    <!-- ======== BO2 Multiplayer ======== -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🔫 BO2 Multiplayer</span>
+        <div>
+          <div class="status-dot" id="dot-bo2mp"></div>
+          <div class="status-label" id="lbl-bo2mp">Unknown</div>
+        </div>
+      </div>
+      <label for="map-bo2mp" style="font-size:0.85rem;color:#aaa;">Map</label>
+      <select id="map-bo2mp">
+        <option value="mp_hijacked">Hijacked</option>
+        <option value="mp_drone">Drone</option>
+        <option value="mp_carrier">Carrier</option>
+        <option value="mp_express">Express</option>
+        <option value="mp_overflow">Overflow</option>
+        <option value="mp_meltdown">Meltdown</option>
+        <option value="mp_slums">Slums</option>
+        <option value="mp_turbine">Turbine</option>
+        <option value="mp_raid">Raid</option>
+        <option value="mp_village">Village</option>
+        <option value="mp_nuketown_2020">Nuketown 2025</option>
+        <option value="mp_standoff">Standoff</option>
+        <option value="mp_plaza2">Aftermath</option>
+        <option value="mp_nightclub">Nightclub (DLC)</option>
+        <option value="mp_socotra">Desert Storm (DLC)</option>
+        <option value="mp_diner">Nuketown Sniper (DLC)</option>
+        <option value="mp_downhill">Downhill (DLC)</option>
+        <option value="mp_mirage">Mirage (DLC)</option>
+        <option value="mp_hydro">Hydro (DLC)</option>
+        <option value="mp_skate">Skate Park (DLC)</option>
+        <option value="mp_bridge">Drawbridge (DLC)</option>
+      </select>
+      <div class="btn-row">
+        <button class="btn-start"   onclick="action('bo2mp','start')">Start</button>
+        <button class="btn-stop"    onclick="action('bo2mp','stop')">Stop</button>
+        <button class="btn-restart" onclick="action('bo2mp','restart')">Restart</button>
+      </div>
+      <div class="msg" id="msg-bo2mp"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- poll status every 5 seconds ---
+    function updateStatus() {
+      fetch('/status')
+        .then(r => r.json())
+        .then(data => {
+          setStatus('minecraft', data.minecraft);
+          setStatus('bo2zm',     data.bo2zm);
+          setStatus('bo2mp',     data.bo2mp);
+        })
+        .catch(() => {
+          ['minecraft','bo2zm','bo2mp'].forEach(s => setStatus(s, null));
+        });
+    }
+
+    function setStatus(server, online) {
+      const dot = document.getElementById('dot-' + server);
+      const lbl = document.getElementById('lbl-' + server);
+      if (online === null) {
+        dot.className = 'status-dot';
+        lbl.textContent = 'Unknown';
+      } else if (online) {
+        dot.className = 'status-dot online';
+        lbl.textContent = 'Online';
+      } else {
+        dot.className = 'status-dot offline';
+        lbl.textContent = 'Offline';
+      }
+    }
+
+    function action(server, cmd) {
+      const msg = document.getElementById('msg-' + server);
+      msg.className = 'msg';
+      msg.textContent = 'Working…';
+
+      const body = {};
+      const mapEl = document.getElementById('map-' + server);
+      if (mapEl) body.map = mapEl.value;
+
+      fetch('/' + server + '/' + cmd, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+        .then(r => r.json())
+        .then(data => {
+          msg.className = 'msg ' + (data.ok ? 'ok' : 'err');
+          msg.textContent = data.message;
+          updateStatus();
+        })
+        .catch(err => {
+          msg.className = 'msg err';
+          msg.textContent = 'Request failed: ' + err.message;
+        });
+    }
+
+    updateStatus();
+    setInterval(updateStatus, 5000);
+  </script>
+</body>
+</html>
